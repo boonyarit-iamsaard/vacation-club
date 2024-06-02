@@ -45,10 +45,25 @@ export const users = createTable(
     updatedAt: timestamp('updated_at').$onUpdate(() => new Date()),
     deletedAt: timestamp('deleted_at'),
   },
-  (user) => ({
-    emailIndex: index('email_idx').on(user.email),
+  (table) => ({
+    emailIndex: index('email_idx').on(table.email),
   }),
 );
 
 export type User = typeof users.$inferSelect;
 export type CreateUserRequest = typeof users.$inferInsert;
+
+export const sessions = createTable(
+  'sessions',
+  {
+    id: uuid('id').primaryKey(),
+    userId: uuid('user_id').notNull(),
+    expiresAt: timestamp('expires_at').notNull(),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').$onUpdate(() => new Date()),
+    deletedAt: timestamp('deleted_at'),
+  },
+  (table) => ({
+    userIdIndex: index('session_user_id_idx').on(table.userId),
+  }),
+);
