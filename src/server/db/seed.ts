@@ -1,9 +1,15 @@
+import { webcrypto } from 'node:crypto';
+
 import * as dotenv from 'dotenv';
 import { drizzle } from 'drizzle-orm/postgres-js';
+import { Scrypt } from 'lucia';
 import postgres from 'postgres';
 import { z } from 'zod';
 
 import { posts, users } from '~/server/db/schema';
+
+// for web crypto api support on node.js 18 or lower
+globalThis.crypto = webcrypto as Crypto;
 
 dotenv.config({ path: '.env' });
 
@@ -21,11 +27,12 @@ async function main() {
     // eslint-disable-next-line drizzle/enforce-delete-with-where
     await db.delete(posts);
 
+    const hashedPassword = await new Scrypt().hash('winteriscoming');
     await db.insert(users).values([
       {
         email: 'arya@stark.com',
         name: 'Arya Stark',
-        hashedPassword: 'password',
+        hashedPassword,
       },
     ]);
 
