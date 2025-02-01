@@ -7,7 +7,8 @@
         "format": "prettier --write --ignore-unknown .",
         "format:check": "prettier --check --ignore-unknown .",
         "lint": "eslint",
-        "lint:fix": "eslint --fix"
+        "lint:fix": "eslint --fix",
+        "prepare": "husky || true"
     },
     "devDependencies": {
         "@eslint/js": "^9.19.0",
@@ -19,7 +20,9 @@
         "concurrently": "^9.0.1",
         "eslint": "^9.19.0",
         "globals": "^15.14.0",
+        "husky": "^9.1.7",
         "laravel-vite-plugin": "^1.2.0",
+        "lint-staged": "^15.4.3",
         "postcss": "^8.4.31",
         "prettier": "^3.4.2",
         "tailwindcss": "^3.1.0",
