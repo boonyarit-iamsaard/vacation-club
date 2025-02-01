@@ -1,0 +1,43 @@
+services:
+  mailpit:
+    container_name: vacation-club-mailpit
+    image: axllent/mailpit
+    restart: unless-stopped
+    volumes:
+      - mailpitdata:/data
+    ports:
+      - '8025:8025'
+      - '1025:1025'
+    environment:
+      MP_MAX_MESSAGES: 5000
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_AUTH_ACCEPT_ANY: 1
+      MP_SMTP_AUTH_ALLOW_INSECURE: 1
+    networks:
+      - vacation-club-network
+
+  mysql:
+    container_name: vacation-club-mysql
+    image: mysql:8.0
+    restart: unless-stopped
+    volumes:
+      - mysqldata:/var/lib/mysql
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+      MYSQL_DATABASE: ${DB_DATABASE}
+      MYSQL_USER: ${DB_USERNAME}
+      MYSQL_PASSWORD: ${DB_PASSWORD}
+    networks:
+      - vacation-club-network
+
+volumes:
+  mailpitdata:
+    name: vacation-club-mailpitdata
+  mysqldata:
+    name: vacation-club-mysqldata
+
+networks:
+  vacation-club-network:
+    name: vacation-club
