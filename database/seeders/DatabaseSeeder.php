@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Role;
 use Illuminate\Database\Eloquent\Factories\Sequence;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
@@ -18,12 +19,16 @@ class DatabaseSeeder extends Seeder
             User::factory()
                 ->count(10)
                 ->sequence(function (Sequence $sequence) {
-                    $name = $sequence->index === 0 ? 'Admin' : "User {$sequence->index}";
-                    $email = $sequence->index === 0 ? 'admin' : "user-{$sequence->index}";
+                    $isAdmin = $sequence->index === 0;
+
+                    $name = $isAdmin ? 'Admin' : "User {$sequence->index}";
+                    $email = $isAdmin ? 'admin' : "user-{$sequence->index}";
+                    $role = $isAdmin ? Role::ADMINISTRATOR : Role::USER;
 
                     return [
                         'name' => $name,
                         'email' => "{$email}@example.com",
+                        'role' => $role,
                     ];
                 })
                 ->create();

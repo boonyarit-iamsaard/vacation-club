@@ -6,11 +6,16 @@ use App\Filament\Admin\Resources\UserResource\Pages\CreateUser;
 use App\Filament\Admin\Resources\UserResource\Pages\EditUser;
 use App\Filament\Admin\Resources\UserResource\Pages\ListUsers;
 use App\Models\User;
+use App\Role;
+use Filament\Forms\Components\FileUpload;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Support\Enums\IconPosition;
 use Filament\Tables\Actions\EditAction;
+use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 
@@ -24,13 +29,27 @@ class UserResource extends Resource
     {
         return $form
             ->schema([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255),
-                TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255),
+                Grid::make([
+                    'default' => 1,
+                    'sm' => 2,
+                ])
+                    ->schema([
+                        TextInput::make('name')
+                            ->required()
+                            ->maxLength(255),
+                        TextInput::make('email')
+                            ->email()
+                            ->required()
+                            ->maxLength(255),
+                        Select::make('role')
+                            ->options(Role::class)
+                            ->default(Role::USER)
+                            ->native(false)
+                            ->required(),
+                        FileUpload::make('image')
+                            ->image()
+                            ->columnSpanFull(),
+                    ]),
             ]);
     }
 
@@ -38,6 +57,10 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                ImageColumn::make('image')
+                    ->label('')
+                    ->circular()
+                    ->defaultImageUrl(url('https://i.pravatar.cc/150')),
                 TextColumn::make('name')
                     ->searchable(),
                 TextColumn::make('email')
@@ -45,6 +68,8 @@ class UserResource extends Resource
                     ->icon(fn (User $record): string => $record->email_verified_at ? 'heroicon-o-shield-check' : '')
                     ->iconColor('success')
                     ->iconPosition(IconPosition::After),
+                TextColumn::make('role')
+                    ->badge(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
