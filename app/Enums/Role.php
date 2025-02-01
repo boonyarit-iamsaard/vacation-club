@@ -1,15 +1,15 @@
 <?php
 
-namespace App;
+namespace App\Enums;
 
 use Filament\Support\Contracts\HasColor;
 use Filament\Support\Contracts\HasLabel;
 use Illuminate\Support\Arr;
 
-enum PriceType: string implements HasColor, HasLabel
+enum Role: string implements HasColor, HasLabel
 {
-    case STANDARD = 'standard';
-    case PROMOTION = 'promotion';
+    case ADMINISTRATOR = 'administrator';
+    case USER = 'user';
 
     /**
      * @return array<int, string>
@@ -22,16 +22,16 @@ enum PriceType: string implements HasColor, HasLabel
     public function getColor(): string
     {
         return match ($this) {
-            self::STANDARD => 'primary',
-            self::PROMOTION => 'warning',
+            self::ADMINISTRATOR => 'danger',
+            self::USER => 'info',
         };
     }
 
     public function getLabel(): string
     {
         return match ($this) {
-            self::STANDARD => 'Standard',
-            self::PROMOTION => 'Promotion',
+            self::ADMINISTRATOR => 'Administrator',
+            self::USER => 'User',
         };
     }
 }

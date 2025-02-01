@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Enums\PriceType;
 use App\Models\Room;
 use App\Models\RoomPrice;
 use App\Models\RoomType;
-use App\PriceType;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Storage;
 

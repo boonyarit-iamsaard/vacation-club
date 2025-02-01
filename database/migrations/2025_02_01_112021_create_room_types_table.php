@@ -1,7 +1,7 @@
 <?php
 
+use App\Enums\PriceType;
 use App\Models\RoomType;
-use App\PriceType;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;

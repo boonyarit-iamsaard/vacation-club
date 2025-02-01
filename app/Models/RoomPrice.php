@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\PriceType;
+use App\Enums\PriceType;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

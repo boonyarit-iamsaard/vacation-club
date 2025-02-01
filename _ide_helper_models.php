@@ -46,7 +46,7 @@ namespace App\Models{
  * @property int $id
  * @property int $weekday
  * @property int $weekend
- * @property \App\PriceType $type
+ * @property \App\Enums\PriceType $type
  * @property string|null $promotion_name
  * @property \Illuminate\Support\Carbon $effective_from
  * @property \Illuminate\Support\Carbon|null $effective_to
@@ -117,7 +117,7 @@ namespace App\Models{
  * @property int $id
  * @property string $name
  * @property string $email
- * @property \App\Role $role
+ * @property \App\Enums\Role $role
  * @property string|null $image
  * @property \Illuminate\Support\Carbon|null $email_verified_at
  * @property string $password

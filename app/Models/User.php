@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Role;
+use App\Enums\Role;
 use Database\Factories\UserFactory;
 use Exception;
 use Filament\Models\Contracts\FilamentUser;
