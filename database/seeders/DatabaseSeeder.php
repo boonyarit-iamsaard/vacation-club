@@ -15,6 +15,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->call([
+            RoomTypeSeeder::class,
+        ]);
+
         if (App::environment('local')) {
             User::factory()
                 ->count(10)
