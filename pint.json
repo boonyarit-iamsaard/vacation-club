@@ -20,7 +20,6 @@
             "allow_single_line_empty_anonymous_classes": true,
             "allow_single_line_anonymous_functions": false
         },
-        "explicit_string_variable": true,
         "global_namespace_import": {
             "import_classes": true,
             "import_constants": true,
@@ -36,7 +35,6 @@
         },
         "php_unit_test_annotation": {
             "style": "annotation"
-        },
-        "simple_to_complex_string_variable": true
+        }
     }
 }
