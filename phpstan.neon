@@ -1,0 +1,35 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - vendor/nesbot/carbon/extension.neon
+
+parameters:
+    scanFiles:
+          - _ide_helper_models.php
+
+    paths:
+        - app/
+        - routes/
+        - bootstrap/
+        - config/
+        - database/
+        - resources/views/
+        - tests/
+
+    # Level 10 is the highest level
+    level: 6
+
+    ignoreErrors:
+        # Ignore errors for PHPUnit
+        - '#Call to an undefined method PHPUnit\\Framework.*#'
+
+        # Ignore errors for Pest
+        # - '#Access to an undefined property Pest\\.*#'
+        # - '#Call to an undefined method Pest\\.*#'
+
+        # Ignore errors for undefined variables
+        - '#Undefined variable: \$this#'
+
+    excludePaths:
+        - _ide_helper_models.php
+        - _ide_helper.php
+        - .phpstorm.meta.php
