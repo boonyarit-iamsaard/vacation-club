@@ -1,0 +1,30 @@
+{
+    "printWidth": 120,
+    "semi": true,
+    "singleQuote": true,
+    "tabWidth": 4,
+    "trailingComma": "all",
+    "plugins": ["@shufo/prettier-plugin-blade"],
+    "overrides": [
+        {
+            "files": ["*.blade.php"],
+            "options": {
+                "parser": "blade",
+                "extraLiners": "",
+                "indentInnerHtml": true,
+                "noPhpSyntaxCheck": false,
+                "sortHtmlAttributes": "none",
+                "sortTailwindcssClasses": true,
+                "trailingCommaPHP": true,
+                "wrapAttributes": "force-expand-multiline",
+                "wrapAttributesMinAttrs": 2
+            }
+        },
+        {
+            "files": ["*.{md,yml,yaml}"],
+            "options": {
+                "tabWidth": 2
+            }
+        }
+    ]
+}
