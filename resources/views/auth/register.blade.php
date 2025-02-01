@@ -92,17 +92,20 @@
             />
         </div>
 
-        <div class="mt-4 flex items-center justify-end">
+        <div class="mt-4 grid">
+            <x-primary-button class="justify-center">
+                Register
+            </x-primary-button>
+        </div>
+
+        <div class="mt-4 flex items-center justify-start gap-2">
+            <span class="text-sm text-gray-600 dark:text-gray-400">Already have an account?</span>
             <a
                 class="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
                 href="{{ route('login') }}"
             >
-                {{ __('Already registered?') }}
+                Log in
             </a>
-
-            <x-primary-button class="ms-4">
-                {{ __('Register') }}
-            </x-primary-button>
         </div>
     </form>
 </x-guest-layout>
