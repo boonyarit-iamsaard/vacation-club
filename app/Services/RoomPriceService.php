@@ -2,14 +2,11 @@
 
 namespace App\Services;
 
-use App\DataTransferObjects\RoomPriceData;
+use App\Data\RoomPriceData;
 use App\Enums\PriceType;
-use App\Http\Requests\RoomPrice\StoreRoomPriceRequest;
-use App\Http\Requests\RoomPrice\UpdateRoomPriceRequest;
 use App\Models\RoomPrice;
 use App\Models\RoomType;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Support\Carbon;
 use InvalidArgumentException;
 
 class RoomPriceService
@@ -27,123 +24,70 @@ class RoomPriceService
         return RoomPrice::with('roomType')->find($id);
     }
 
-    public function create(StoreRoomPriceRequest|RoomPriceData $data): RoomPrice
+    public function create(RoomPriceData $roomPriceData): RoomPrice
     {
-        $priceData = $data instanceof StoreRoomPriceRequest
-            ? RoomPriceData::fromRequest($data->validated())
-            : $data;
+        $roomType = RoomType::findOrFail($roomPriceData->room_type_id);
 
-        $roomType = RoomType::findOrFail($priceData->room_type_id);
-
-        $roomPrice = new RoomPrice([
-            'room_type_id' => $priceData->room_type_id,
-            'weekday' => $priceData->weekday,
-            'weekend' => $priceData->weekend,
-            'type' => $priceData->type,
-            'promotion_name' => $priceData->promotion_name,
-            'effective_from' => $priceData->effective_from,
-            'effective_to' => $priceData->effective_to,
-        ]);
+        $roomPrice = new RoomPrice($roomPriceData->toArray());
 
         $this->syncRoomTypeData($roomPrice, $roomType);
 
-        if ($priceData->type === PriceType::STANDARD) {
-            $this->handleStandardPriceCreation($roomPrice);
-        }
-
-        if ($priceData->type === PriceType::PROMOTION) {
-            $this->handlePromotionalPriceCreation($roomPrice);
-        }
+        match ($roomPrice->type) {
+            PriceType::STANDARD => $this->handleStandardPrice($roomPrice),
+            PriceType::PROMOTION => $this->handlePromotionPrice($roomPrice),
+        };
 
         $roomPrice->save();
 
         return $roomPrice->load('roomType');
     }
 
-    public function update(RoomPrice $roomPrice, UpdateRoomPriceRequest $request): RoomPrice
+    public function update(RoomPrice $roomPrice, RoomPriceData $roomPriceData): RoomPrice
     {
-        $validated = $request->validated();
+        $roomType = RoomType::findOrFail($roomPriceData->room_type_id);
 
-        // If room type is being updated, ensure it exists and sync denormalized data
-        if (isset($validated['room_type_id'])) {
-            $roomType = RoomType::findOrFail($validated['room_type_id']);
-            $this->syncRoomTypeData($roomPrice, $roomType);
-        }
+        $roomPrice = $roomPrice->fill($roomPriceData->toArray());
 
-        // If type is being updated, handle the business logic
-        if (isset($validated['type'])) {
-            if ($validated['type'] === PriceType::STANDARD->value) {
-                $this->handleStandardPriceCreation($roomPrice);
-            }
+        $this->syncRoomTypeData($roomPrice, $roomType);
 
-            if ($validated['type'] === PriceType::PROMOTION->value) {
-                $this->handlePromotionalPriceCreation($roomPrice);
-            }
-        }
+        match ($roomPrice->type) {
+            PriceType::STANDARD => $this->handleStandardPrice($roomPrice),
+            PriceType::PROMOTION => $this->handlePromotionPrice($roomPrice),
+        };
 
-        $roomPrice->fill($validated);
         $roomPrice->save();
 
         return $roomPrice->load('roomType');
     }
 
-    /**
-     * Delete a room price
-     *
-     * Note: Since we don't have cascading in database, we need to ensure
-     * there are no dependent records and business rules are respected before deletion
-     */
     public function delete(RoomPrice $roomPrice): void
     {
         if ($roomPrice->type === PriceType::STANDARD) {
-            $remainingStandardPrices = RoomPrice::query()
-                ->where('room_type_id', $roomPrice->room_type_id)
-                ->standard()
-                ->active()
-                ->whereNot('id', $roomPrice->id)
-                ->exists();
-
-            if (! $remainingStandardPrices) {
-                throw new InvalidArgumentException('Cannot delete the last active standard price for this room type');
-            }
+            $this->ensureNotLastActiveStandardPrice($roomPrice);
         }
 
         $roomPrice->delete();
     }
 
     /**
-     * @return Collection<int, RoomPrice>
+     * Prevent deletion of the last active standard price for a room type
+     * This ensures that each room type always has at least one standard price
      */
-    public function getActiveStandardPrices(): Collection
+    private function ensureNotLastActiveStandardPrice(RoomPrice $roomPrice): void
     {
-        return RoomPrice::with('roomType')
+        $remainingStandardPrices = RoomPrice::query()
+            ->where('room_type_id', $roomPrice->room_type_id)
             ->standard()
             ->active()
-            ->get();
+            ->whereNot('id', $roomPrice->id)
+            ->exists();
+
+        if (! $remainingStandardPrices) {
+            throw new InvalidArgumentException('Cannot delete the last active standard price for this room type');
+        }
     }
 
-    /**
-     * @return Collection<int, RoomPrice>
-     */
-    public function getActivePromotionalPrices(): Collection
-    {
-        return RoomPrice::with('roomType')
-            ->promotional()
-            ->active()
-            ->get();
-    }
-
-    /**
-     * @return Collection<int, RoomPrice>
-     */
-    public function getFuturePrices(): Collection
-    {
-        return RoomPrice::with('roomType')
-            ->future()
-            ->get();
-    }
-
-    private function handleStandardPriceCreation(RoomPrice $roomPrice): void
+    private function handleStandardPrice(RoomPrice $roomPrice): void
     {
         $previousStandardPrice = RoomPrice::query()
             ->where('room_type_id', $roomPrice->room_type_id)
@@ -152,21 +96,21 @@ class RoomPriceService
             ->first();
 
         if ($previousStandardPrice) {
-            $previousStandardPrice->effective_to = Carbon::parse($roomPrice->effective_from)->subDay();
+            $previousStandardPrice->effective_to = $roomPrice->effective_from->subDay();
             $previousStandardPrice->save();
         }
     }
 
-    private function handlePromotionalPriceCreation(RoomPrice $roomPrice): void
+    private function handlePromotionPrice(RoomPrice $roomPrice): void
     {
-        $previousPromotionalPrice = RoomPrice::query()
+        $previousPromotionPrice = RoomPrice::query()
             ->where('room_type_id', $roomPrice->room_type_id)
-            ->promotional()
+            ->promotion()
             ->latest()
             ->first();
 
-        if ($previousPromotionalPrice && ! Carbon::parse($roomPrice->effective_from)->isAfter($previousPromotionalPrice->effective_from)) {
-            throw new InvalidArgumentException('Promotional price must be effective after the previous promotional price');
+        if ($previousPromotionPrice && ! $roomPrice->effective_from->isAfter($previousPromotionPrice->effective_from)) {
+            throw new InvalidArgumentException('Promotion price must be effective after the previous promotion price');
         }
     }
 

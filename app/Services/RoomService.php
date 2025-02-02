@@ -2,13 +2,10 @@
 
 namespace App\Services;
 
-use App\DataTransferObjects\RoomData;
-use App\Http\Requests\Room\StoreRoomRequest;
-use App\Http\Requests\Room\UpdateRoomRequest;
+use App\Data\RoomData;
 use App\Models\Room;
 use App\Models\RoomType;
 use Illuminate\Database\Eloquent\Collection;
-use InvalidArgumentException;
 
 class RoomService
 {
@@ -25,35 +22,29 @@ class RoomService
         return Room::with('type')->find($id);
     }
 
-    public function create(StoreRoomRequest|RoomData $data): Room
+    public function create(RoomData $roomData): Room
     {
-        $roomData = $data instanceof StoreRoomRequest
-            ? RoomData::fromRequest($data->validated())
-            : $data;
-
+        // TODO: invoke RoomTypeService instead of directly accessing RoomType
         $roomType = RoomType::findOrFail($roomData->room_type_id);
 
-        $room = new Room([
-            'name' => $roomData->name,
-            'room_type_id' => $roomData->room_type_id,
-        ]);
+        $room = new Room($roomData->toArray());
+
         $this->syncRoomTypeData($room, $roomType);
+
         $room->save();
 
         return $room->load('type');
     }
 
-    public function update(Room $room, UpdateRoomRequest $request): Room
+    public function update(Room $room, RoomData $roomData): Room
     {
-        $validated = $request->validated();
+        // TODO: invoke RoomTypeService instead of directly accessing RoomType
+        $roomType = RoomType::findOrFail($roomData->room_type_id);
 
-        // If room type is being updated, ensure it exists and sync denormalized data
-        if (isset($validated['room_type_id'])) {
-            $roomType = RoomType::findOrFail($validated['room_type_id']);
-            $this->syncRoomTypeData($room, $roomType);
-        }
+        $room->fill($roomData->toArray());
 
-        $room->fill($validated);
+        $this->syncRoomTypeData($room, $roomType);
+
         $room->save();
 
         return $room->load('type');
@@ -69,25 +60,6 @@ class RoomService
     {
         // Add any additional relationship checks here if needed in the future
         $room->delete();
-    }
-
-    /**
-     * Maintain denormalized data integrity for room type relationship
-     * Used by model observers to ensure data consistency during create/update operations
-     */
-    public function maintainRoomTypeIntegrity(Room $room): void
-    {
-        if (! $room->room_type_id) {
-            throw new InvalidArgumentException('Room type ID is required');
-        }
-
-        $roomType = RoomType::find($room->room_type_id);
-
-        if (! $roomType) {
-            throw new InvalidArgumentException('Room type not found');
-        }
-
-        $this->syncRoomTypeData($room, $roomType);
     }
 
     /**

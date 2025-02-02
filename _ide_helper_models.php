@@ -48,8 +48,8 @@ namespace App\Models{
  * @property int $weekend
  * @property \App\Enums\PriceType $type
  * @property string|null $promotion_name
- * @property \Illuminate\Support\Carbon $effective_from
- * @property \Illuminate\Support\Carbon|null $effective_to
+ * @property \Carbon\CarbonImmutable $effective_from
+ * @property \Carbon\CarbonImmutable|null $effective_to
  * @property int|null $room_type_id
  * @property string $room_type_name
  * @property string $room_type_code
@@ -60,7 +60,7 @@ namespace App\Models{
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice future()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice promotional()
+ * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice promotion()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice query()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice standard()
  * @method static \Illuminate\Database\Eloquent\Builder<static>|RoomPrice whereCreatedAt($value)

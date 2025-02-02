@@ -29,8 +29,8 @@ class RoomPrice extends Model
         'weekday' => 'integer',
         'weekend' => 'integer',
         'type' => PriceType::class,
-        'effective_from' => 'date',
-        'effective_to' => 'date',
+        'effective_from' => 'immutable_datetime',
+        'effective_to' => 'immutable_datetime',
     ];
 
     /**
@@ -46,7 +46,7 @@ class RoomPrice extends Model
      * @param  Builder<RoomPrice>  $query
      * @return Builder<RoomPrice>
      */
-    public function scopePromotional(Builder $query): Builder
+    public function scopePromotion(Builder $query): Builder
     {
         return $query->where('type', PriceType::PROMOTION);
     }
