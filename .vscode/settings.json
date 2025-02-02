@@ -1,0 +1,9 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "laravel-pint.enable": true,
+    "tighten-lint.exec": "./vendor/bin/tlint",
+    "[php]": {
+        "editor.defaultFormatter": "open-southeners.laravel-pint"
+    }
+}
