@@ -4,10 +4,11 @@ namespace Database\Seeders;
 
 use App\Data\RoomData;
 use App\Data\RoomPriceData;
+use App\Data\RoomTypeData;
 use App\Enums\PriceType;
-use App\Models\RoomType;
 use App\Services\RoomPriceService;
 use App\Services\RoomService;
+use App\Services\RoomTypeService;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Storage;
@@ -17,6 +18,7 @@ class RoomTypeSeeder extends Seeder
     public function __construct(
         private readonly RoomPriceService $roomPriceService,
         private readonly RoomService $roomService,
+        private readonly RoomTypeService $roomTypeService,
     ) {}
 
     public function run(): void
@@ -34,11 +36,11 @@ class RoomTypeSeeder extends Seeder
         $this->command->info('Seeding room types...');
 
         foreach ($roomTypes as $roomType) {
-            $createdRoomType = RoomType::create([
+            $createdRoomType = $this->roomTypeService->create(RoomTypeData::validateAndCreate([
                 'name' => $roomType['name'],
                 'code' => $roomType['code'],
                 'description' => $roomType['description'],
-            ]);
+            ]));
 
             $weekdayPrice = (int) $roomType['price']['weekday'];
             $weekendPrice = (int) $roomType['price']['weekend'];
